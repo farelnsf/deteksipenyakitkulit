@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/f-scanskin_logoonly.png') }}">
+  <title>F-ScanSkin | Deteksi Real-time</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #e8f7ff;
+      color: #005f87;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    h2 {
+      text-align: center;
+      color: #0066cc;
+      margin-bottom: 20px;
+    }
+    
+    .realtime-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .camera-controls {
+      margin: 15px 0;
+      text-align: center;
+    }
+    
+    .camera-select {
+      padding: 8px 15px;
+      border-radius: 8px;
+      border: 1px solid #61dafb;
+      background-color: white;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 300px;
+    }
+    
+    .video-container {
+      margin: 20px 0;
+      background-color: #000;
+      border-radius: 10px;
+      padding: 10px;
+      position: relative;
+      min-height: 300px;
+    }
+    
+    .realtime-feed {
+      width: 100%;
+      max-width: 500px;
+      display: block;
+      margin: 0 auto;
+      border-radius: 5px;
+    }
+    
+    .realtime-disclaimer {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .button-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    
+    .back-button {
+      background-color: #61dafb;
+      border: none;
+      color: #003f5c;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .back-button:hover {
+      background-color: #4fc3f7;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+    }
+    
+    /* Loading indicator */
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 18px;
+      text-align: center;
+      width: 100%;
+    }
+    
+    /* Error message */
+    .error-message {
+      color: #ff4444;
+      background-color: #ffeeee;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      text-align: center;
+      display: none;
+    }
+    
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 100;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .modal-content {
+      background-color: #fff;
+      margin: auto;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      border: 2px solid #ff6b6b;
+    }
+    
+    .modal-content h3 {
+      color: #d32f2f;
+      font-size: 1.5rem;
+      margin-top: 0;
+      margin-bottom: 20px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .modal-content p {
+      color: #555;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+    
+    #confirmWarning {
+      background-color: #d32f2f;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-block;
+      margin: 0 auto;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+    
+    #confirmWarning:hover {
+      background-color: #b71c1c;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    }
+    
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    
+    .close:hover {
+      color: #555;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Modal -->
+  <div id="warningModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>⚠ PERINGATAN MEDIS PENTING</h3>
+      <p>Aplikasi ini hanya untuk tujuan informasi awal dan <strong>tidak menggantikan diagnosis profesional</strong>.</p>
+      <p>Hasil deteksi mungkin tidak 100% akurat. Selalu konsultasikan kondisi kulit Anda ke dokter spesialis kulit.</p>
+      <button id="confirmWarning">Saya Mengerti</button>
+    </div>
+  </div>
+
+  <div class="realtime-container">
+    <h2>Deteksi Real-time dengan Kamera</h2>
+    
+    <div class="error-message" id="cameraError"></div>
+    
+    <div class="camera-controls">
+      <label for="realtimeCameraSelect">Pilih Kamera:</label>
+      <select id="realtimeCameraSelect" class="camera-select">
+        <option value="">Loading kamera...</option>
+      </select>
+    </div>
+    
+    <div class="video-container">
+      <div class="loading">Memuat kamera...</div>
+      <img class="realtime-feed" id="realtimeFeed" alt="Live Feed">
+    </div>
+    
+    <div class="realtime-disclaimer">
+      <h3>Informasi Penting:</h3>
+      <p>Deteksi ini bersifat real-time dan <strong>belum tentu 100% akurat</strong>.</p>
+      <p>Untuk diagnosis yang lebih pasti, konsultasikan ke dokter spesialis kulit.</p>
+      <ul>
+        <li>Pastikan pencahayaan cukup</li>
+        <li>Jaga jarak kamera 30-50 cm dari kulit</li>
+        <li>Hindari penggunaan filter atau efek</li>
+      </ul>
+    </div>
+    
+    <div class="button-container">
+      <button onclick="location.href='/home'" class="back-button">Kembali ke Beranda</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tampilkan modal warning
+        const warningModal = document.getElementById('warningModal');
+        warningModal.style.display = 'block';
+        
+        // Elemen UI
+        const cameraSelect = document.getElementById('realtimeCameraSelect');
+        const feed = document.getElementById('realtimeFeed');
+        const loading = document.querySelector('.loading');
+        const errorMessage = document.getElementById('cameraError');
+        
+        // Cek apakah HTTPS atau localhost
+        const isSecure = window.location.protocol === 'https:' || 
+                        window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1';
+        
+        if (!isSecure) {
+            showError("Akses kamera membutuhkan HTTPS atau localhost. Silakan akses melalui HTTPS atau localhost.");
+            return;
+        }
+        
+        // Fungsi untuk menampilkan error
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            loading.style.display = 'none';
+            feed.style.display = 'none';
+        }
+        
+        // Mapping device ID browser ke index kamera
+        let cameraIndexMapping = {};
+        
+        // Fungsi untuk memuat feed kamera
+        function loadCameraFeed(deviceId) {
+            loading.style.display = 'block';
+            feed.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            // Gunakan index mapping atau deviceId asli
+            const cameraId = cameraIndexMapping[deviceId] !== undefined ? 
+                           cameraIndexMapping[deviceId] : 
+                           deviceId;
+            
+            // Tambahkan timestamp untuk menghindari cache
+            const timestamp = Date.now();
+            const feedUrl = "{{ url_for('realtime_feed') }}?device=" + 
+                          encodeURIComponent(cameraId) + 
+                          "&t=" + timestamp;
+            
+            feed.src = feedUrl;
+            
+            // Handler ketika feed berhasil dimuat
+            feed.onload = function() {
+                loading.style.display = 'none';
+                feed.style.display = 'block';
+            };
+            
+            // Handler ketika terjadi error
+            feed.onerror = function() {
+                showError("Gagal memuat kamera. Pastikan kamera tersedia dan izin diberikan.");
+            };
+        }
+        
+        // Dapatkan daftar kamera yang tersedia
+        function enumerateCameras() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                showError("Browser tidak mendukung enumerasi perangkat.");
+                return;
+            }
+            
+            navigator.mediaDevices.enumerateDevices()
+                .then(devices => {
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                    
+                    cameraSelect.innerHTML = '';
+                    
+                    if (videoDevices.length === 0) {
+                        showError("Tidak ada kamera yang terdeteksi.");
+                        return;
+                    }
+                    
+                    // Buat mapping deviceId browser ke index kamera
+                    videoDevices.forEach((device, index) => {
+                        cameraIndexMapping[device.deviceId] = index;
+                    });
+                    
+                    // Tambahkan opsi untuk setiap kamera
+                    videoDevices.forEach((device, index) => {
+                        const label = device.label || `Kamera ${index + 1}`;
+                        cameraSelect.add(new Option(label, device.deviceId));
+                    });
+                    
+                    // Setel kamera default (yang pertama)
+                    cameraSelect.value = videoDevices[0].deviceId;
+                    loadCameraFeed(videoDevices[0].deviceId);
+                    
+                    // Handler ketika kamera diubah
+                    cameraSelect.addEventListener('change', function() {
+                        loadCameraFeed(this.value);
+                    });
+                })
+                .catch(err => {
+                    console.error("Error enumerating devices:", err);
+                    showError("Gagal mengakses daftar kamera: " + err.message);
+                });
+        }
+        
+        // Minta izin kamera terlebih dahulu sebelum enumerasi
+        function requestCameraPermission() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showError("Browser tidak mendukung akses kamera.");
+                return;
+            }
+            
+            // Minta izin untuk kamera default
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    // Setelah izin diberikan, hentikan stream dan enumerasi kamera
+                    stream.getTracks().forEach(track => track.stop());
+                    enumerateCameras();
+                })
+                .catch(err => {
+                    console.error("Camera permission denied:", err);
+                    showError("Izin kamera ditolak. Silakan berikan izin untuk melanjutkan.");
+                });
+        }
+        
+        // Modal handling
+        document.getElementById('confirmWarning').onclick = function() {
+            warningModal.style.display = 'none';
+            requestCameraPermission();
+        };
+        
+        document.querySelector('.close').onclick = function() {
+            warningModal.style.display = 'none';
+            requestCameraPermission();
+        };
+    });
+  </script>
+</body>
+</html>

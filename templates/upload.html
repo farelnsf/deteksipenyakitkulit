@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/f-scanskin_logoonly.png') }}">
+  <title>F-ScanSkin | Upload</title>
+  <!-- Add Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #e8f7ff;
+      color: #005f87;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    h2 {
+      text-align: center;
+      color: #0066cc;
+    }
+    
+    .upload-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .upload-instruction {
+      background-color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    
+    /* Custom Upload Box Styles */
+    .upload-box {
+      background-color: #a5d8ff;
+      border: 2px dashed #4dabf7;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 20px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .upload-box:hover {
+      background-color: #8ecfff;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 119, 182, 0.1);
+    }
+    
+    .upload-box i {
+      font-size: 48px;
+      color: #1971c2;
+      margin-bottom: 15px;
+    }
+    
+    .upload-box h3 {
+      margin: 0 0 10px;
+      color: #1864ab;
+    }
+    
+    .upload-box p {
+      margin: 0;
+      color: #1971c2;
+      font-size: 14px;
+    }
+    
+    #fileInput {
+      display: none;
+    }
+    
+    #fileName {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #1864ab;
+      display: none;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    button {
+      background-color: #61dafb;
+      border: none;
+      color: #003f5c;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    button:hover {
+      background-color: #4fc3f7;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .back-button {
+      background-color: #f0f0f0;
+      color: #555;
+    }
+    
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 100;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .modal-content {
+      background-color: #fff;
+      margin: auto;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      border: 2px solid #ff6b6b;
+    }
+    
+    .modal-content h3 {
+      color: #d32f2f;
+      font-size: 1.5rem;
+      margin-top: 0;
+      margin-bottom: 20px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .modal-content p {
+      color: #555;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+    
+    #confirmWarning {
+      background-color: #d32f2f;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-block;
+      margin: 0 auto;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+    
+    #confirmWarning:hover {
+      background-color: #b71c1c;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    }
+    
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    
+    .close:hover {
+      color: #555;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Modal -->
+  <div id="warningModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>⚠ PERINGATAN MEDIS PENTING</h3>
+      <p>Aplikasi ini hanya untuk tujuan informasi awal dan <strong>tidak menggantikan diagnosis profesional</strong>.</p>
+      <p>Hasil deteksi mungkin tidak 100% akurat. Selalu konsultasikan kondisi kulit Anda ke dokter spesialis kulit.</p>
+      <button id="confirmWarning">Saya Mengerti</button>
+    </div>
+  </div>
+
+  <div class="upload-container">
+    <h2>Upload Gambar dari File</h2>
+    
+    <div class="upload-instruction">
+      <p>Pastikan gambar memenuhi kriteria:</p>
+      <ul>
+        <li>Format: JPG/PNG</li>
+        <li>Ukuran maksimal: 5MB</li>
+        <li>Area kulit terlihat jelas</li>
+      </ul>
+    </div>
+    
+    <form action="/detect" method="POST" enctype="multipart/form-data">
+      <!-- Custom Upload Box -->
+      <label for="fileInput">
+        <div class="upload-box" id="uploadBox">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <h3>Pilih Gambar</h3>
+          <p>Seret & lepas file di sini atau klik untuk memilih</p>
+          <div id="fileName"></div>
+        </div>
+      </label>
+      <input type="file" id="fileInput" name="file" accept="image/*" required>
+      
+      <div class="button-group">
+        <button type="submit">
+          <i class="fas fa-search"></i>
+          Deteksi
+        </button>
+        <button type="button" onclick="location.href='/home'" class="back-button">
+          <i class="fas fa-arrow-left"></i>
+          Kembali ke Beranda
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('warningModal');
+      modal.style.display = 'block';
+      
+      document.querySelector('.close').onclick = 
+      document.getElementById('confirmWarning').onclick = function() {
+        modal.style.display = 'none';
+      };
+
+      // Handle file selection
+      const fileInput = document.getElementById('fileInput');
+      const uploadBox = document.getElementById('uploadBox');
+      const fileName = document.getElementById('fileName');
+
+      fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+          fileName.textContent = this.files[0].name;
+          fileName.style.display = 'block';
+          uploadBox.style.backgroundColor = '#8ecfff';
+          uploadBox.innerHTML = '<i class="fas fa-check-circle" style="color:#2b8a3e"></i><h3>File Dipilih</h3>';
+          uploadBox.innerHTML += '<div id="fileName">' + this.files[0].name + '</div>';
+        }
+      });
+
+      // Drag and drop functionality
+      uploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadBox.style.backgroundColor = '#8ecfff';
+        uploadBox.style.borderColor = '#1971c2';
+      });
+
+      uploadBox.addEventListener('dragleave', () => {
+        uploadBox.style.backgroundColor = '#a5d8ff';
+        uploadBox.style.borderColor = '#4dabf7';
+      });
+
+      uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadBox.style.backgroundColor = '#a5d8ff';
+        uploadBox.style.borderColor = '#4dabf7';
+        
+        if (e.dataTransfer.files.length) {
+          fileInput.files = e.dataTransfer.files;
+          fileName.textContent = e.dataTransfer.files[0].name;
+          fileName.style.display = 'block';
+          uploadBox.innerHTML = '<i class="fas fa-check-circle" style="color:#2b8a3e"></i><h3>File Dipilih</h3>';
+          uploadBox.innerHTML += '<div id="fileName">' + e.dataTransfer.files[0].name + '</div>';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

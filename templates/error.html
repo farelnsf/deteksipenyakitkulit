@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/f-scanskin_logoonly.png') }}">
+  <title>F-ScanSkin | Error</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #e8f7ff;
+      color: #005f87;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    
+    .error-container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 500px;
+      width: 90%;
+    }
+    
+    h2 {
+      color: #d32f2f;
+    }
+    
+    .error-message {
+      margin: 20px 0;
+    }
+    
+    .back-button {
+      background-color: #f0f0f0;
+      color: #555;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="error-container">
+    <h2>Terjadi Kesalahan</h2>
+    <p class="error-message">{{ error_message }}</p>
+    <a href="/home" class="back-button">Kembali ke Beranda</a>
+  </div>
+</body>
+</html>

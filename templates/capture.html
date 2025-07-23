@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/f-scanskin_logoonly.png') }}">
+  <title>F-ScanSkin | Ambil Gambar</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #e8f7ff;
+      color: #005f87;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    h2 {
+      text-align: center;
+      color: #0066cc;
+    }
+    
+    .camera-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .camera-controls {
+      margin: 15px 0;
+      text-align: center;
+    }
+    
+    .camera-select {
+      padding: 8px 15px;
+      border-radius: 8px;
+      border: 1px solid #61dafb;
+      background-color: white;
+      margin-bottom: 15px;
+    }
+    
+    video {
+      width: 100%;
+      max-width: 500px;
+      display: block;
+      margin: 0 auto;
+      border-radius: 10px;
+      background-color: #000;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 20px 0;
+      align-items: center;
+    }
+    
+    button {
+      background-color: #61dafb;
+      border: none;
+      color: #003f5c;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      min-width: 200px;
+    }
+    
+    .back-button {
+      background-color: #f0f0f0;
+      color: #555;
+    }
+    
+    #previewImage {
+      max-width: 100%;
+      display: none;
+      margin: 15px auto;
+      border-radius: 10px;
+    }
+    
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 100;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .modal-content {
+      background-color: #fff;
+      margin: auto;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      border: 2px solid #ff6b6b;
+    }
+    
+    .modal-content h3 {
+      color: #d32f2f;
+      font-size: 1.5rem;
+      margin-top: 0;
+      margin-bottom: 20px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .modal-content p {
+      color: #555;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+    
+    #confirmWarning {
+      background-color: #d32f2f;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-block;
+      margin: 0 auto;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+    
+    #confirmWarning:hover {
+      background-color: #b71c1c;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    }
+    
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    
+    .close:hover {
+      color: #555;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Modal -->
+  <div id="warningModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>⚠ PERINGATAN MEDIS PENTING</h3>
+      <p>Aplikasi ini hanya untuk tujuan informasi awal dan <strong>tidak menggantikan diagnosis profesional</strong>.</p>
+      <p>Hasil deteksi mungkin tidak 100% akurat. Selalu konsultasikan kondisi kulit Anda ke dokter spesialis kulit.</p>
+      <button id="confirmWarning">Saya Mengerti</button>
+    </div>
+  </div>
+
+  <div class="camera-container">
+    <h2>Ambil Gambar dengan Kamera</h2>
+
+    <div class="camera-controls">
+      <label for="cameraSelect">Pilih Kamera:</label>
+      <select id="cameraSelect" class="camera-select">
+        <option value="">Loading kamera...</option>
+      </select>
+    </div>
+
+    <video id="video" width="400" autoplay playsinline></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <br>
+
+    <div class="button-group">
+      <button id="captureBtn">Ambil Gambar</button>
+      <button onclick="location.href='/home'" class="back-button">Kembali ke Beranda</button>
+    </div>
+
+    <img id="previewImage" style="display:none; margin-top:10px;" width="400" />
+
+    <form id="form" method="POST" action="/detect">
+      <input type="hidden" name="image" id="imageInput">
+      <div class="button-group">
+        <button type="submit" id="detectBtn" style="display:none;">Deteksi</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/capture.js') }}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('warningModal');
+      const closeBtn = document.querySelector('.close');
+      const confirmBtn = document.getElementById('confirmWarning');
+
+      // Debug: Cek apakah elemen modal ditemukan
+      if (!modal) {
+        console.error("Modal tidak ditemukan! Pastikan ID 'warningModal' ada.");
+        return;
+      }
+
+      // =============================================
+      // UNTUK TESTING SAJA (HAPUS SETELAH DEVELOPMENT)
+      // Paksa tampilkan modal dan hapus localStorage
+      modal.style.display = 'block';
+      localStorage.removeItem('warningRead');
+      // =============================================
+
+      // Tampilkan modal jika localStorage kosong
+      if (!localStorage.getItem('warningRead')) {
+        console.log("Modal akan ditampilkan (warningRead tidak ada)");
+        modal.style.display = 'block';
+      } else {
+        console.log("Modal tidak ditampilkan (warningRead sudah ada)");
+      }
+
+      // Tutup modal saat klik [×] atau tombol "Saya Mengerti"
+      closeBtn.onclick = function() {
+        modal.style.display = 'none';
+        localStorage.setItem('warningRead', 'true');
+      };
+
+      confirmBtn.onclick = function() {
+        modal.style.display = 'none';
+        localStorage.setItem('warningRead', 'true');
+      };
+
+      // Tutup modal saat klik di luar area konten
+      window.onclick = function(event) {
+        if (event.target === modal) {
+          modal.style.display = 'none';
+          localStorage.setItem('warningRead', 'true');
+        }
+      };
+    });
+  </script>
+</body>
+</html>

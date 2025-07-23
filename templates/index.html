@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/f-scanskin_logoonly.png') }}">
+  <title>F-ScanSkin | Beranda</title>
+  <!-- Add Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #e8f7ff;
+      color: #005f87;
+      margin: 0;
+      padding: 20px;
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      margin-right: 15px;
+    }
+    
+    h1 {
+      color: #0066cc;
+      margin: 0;
+    }
+    
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    
+    button {
+      background-color: #61dafb;
+      border: none;
+      color: #003f5c;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    button:hover {
+      background-color: #4fc3f7;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @media (min-width: 768px) {
+      .button-container {
+        max-width: 350px;
+      }
+      
+      button {
+        padding: 14px;
+        font-size: 17px;
+      }
+      
+      .logo-icon {
+        width: 50px;
+        height: 50px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="{{ url_for('static', filename='img/f-scanskin_logoonly.png') }}" alt="F-ScanSkin Logo" class="logo-icon">
+    <h1>F-ScanSkin</h1>
+  </div>
+  
+  <div class="button-container">
+    <button onclick="location.href='/camera'">
+      <i class="fas fa-camera"></i>
+      Ambil Gambar dengan Kamera
+    </button>
+    <button onclick="location.href='/upload'">
+      <i class="fas fa-upload"></i>
+      Upload Gambar dari File
+    </button>
+    <button onclick="location.href='/realtime_view'">
+      <i class="fas fa-video"></i>
+      Deteksi Real-time
+    </button>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Smooth hover effect for buttons
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.addEventListener('mouseenter', () => {
+          button.style.transform = 'translateY(-2px)';
+          button.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+        });
+        button.addEventListener('mouseleave', () => {
+          button.style.transform = 'translateY(0)';
+          button.style.boxShadow = 'none';
+        });
+      });
+    });
+  </script>
+</body>
+</html>

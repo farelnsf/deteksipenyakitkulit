@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="refresh" content="5; url=/home">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/f-scanskin_logoonly.png') }}">
+  <title>F-ScanSkin</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #e8f7ff;
+      color: #005f87;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease-out forwards;
+    }
+    
+    img {
+      width: 150px;
+      max-width: 80%;
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+      color: #0066cc;
+      margin-bottom: 10px;
+    }
+    
+    p {
+      font-size: 1rem;
+      color: #7f8c8d;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @media (max-width: 480px) {
+      h1 { font-size: 1.3rem; }
+      p { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <img src="{{ url_for('static', filename='img/f-scanskin_logo+name.png') }}" alt="F-ScanSkin Logo">
+  <h1>Selamat Datang di Aplikasi F-ScanSkin</h1>
+  <p>Menyiapkan sistem...</p>
+  
+  <script>
+    setTimeout(function() {
+      document.body.style.opacity = '0';
+      document.body.style.transition = 'opacity 0.5s ease-out';
+      setTimeout(function() {
+        window.location.href = '/home';
+      }, 500);
+    }, 4500);
+  </script>
+</body>
+</html>

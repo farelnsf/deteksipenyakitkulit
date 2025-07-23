@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/f-scanskin_logoonly.png') }}">
+  <title>F-ScanSkin | Hasil Deteksi</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #e8f7ff;
+      color: #005f87;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .main-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    h2 {
+      text-align: center;
+      color: #0066cc;
+    }
+    
+    .result-image {
+      width: 100%;
+      max-width: 500px;
+      display: block;
+      margin: 0 auto;
+      border-radius: 10px;
+    }
+    
+    .simplified-results {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    
+    .detection-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .condition-name {
+      font-weight: bold;
+      color: #005f87;
+    }
+    
+    .severity-level {
+      background-color: #e1f0ff;
+      padding: 5px 10px;
+      border-radius: 20px;
+    }
+    
+    .disclaimer-box {
+      background-color: #fff8f8;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    
+    .back-button {
+      background-color: #f0f0f0;
+      color: #555;
+      padding: 12px 24px;
+      display: block;
+      margin: 20px auto;
+      width: 200px;
+      text-align: center;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .back-button:hover {
+      background-color: #e0e0e0;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 100;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .modal-content {
+      background-color: #fff;
+      margin: auto;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      border: 2px solid #ff6b6b;
+    }
+    
+    .modal-content h3 {
+      color: #d32f2f;
+      font-size: 1.5rem;
+      margin-top: 0;
+      margin-bottom: 20px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .modal-content p {
+      color: #555;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+    
+    #confirmWarning {
+      background-color: #d32f2f;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-block;
+      margin: 0 auto;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+    
+    #confirmWarning:hover {
+      background-color: #b71c1c;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    }
+    
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    
+    .close:hover {
+      color: #555;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Modal -->
+  <div id="warningModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>⚠ PERINGATAN MEDIS PENTING</h3>
+      <p>Aplikasi ini hanya untuk tujuan informasi awal dan <strong>tidak menggantikan diagnosis profesional</strong>.</p>
+      <p>Hasil deteksi mungkin tidak 100% akurat. Selalu konsultasikan kondisi kulit Anda ke dokter spesialis kulit.</p>
+      <button id="confirmWarning">Saya Mengerti</button>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <h2>Hasil Deteksi Masalah Kulit</h2>
+    
+    <img src="{{ result }}" class="result-image">
+    
+    {% if has_detection %}
+      <div class="simplified-results">
+        <h3>Hasil Deteksi:</h3>
+        {% for i in range(labels|length) %}
+          <div class="detection-item">
+            <span class="condition-name">{{ labels[i] }}</span>
+            <span class="severity-level">{{ scores[i] }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="simplified-results">
+        <p>Tidak ada masalah kulit terdeteksi.</p>
+      </div>
+    {% endif %}
+    
+    <div class="disclaimer-box">
+      <h3>Penting!</h3>
+      <p>Hasil deteksi ini merupakan analisis otomatis dan <strong>belum tentu 100% akurat</strong>.</p>
+    </div>
+    
+    <button onclick="location.href='/home'" class="back-button">Kembali ke Beranda</button>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('warningModal');
+      modal.style.display = 'block';
+      
+      document.querySelector('.close').onclick = 
+      document.getElementById('confirmWarning').onclick = function() {
+        modal.style.display = 'none';
+      };
+    });
+  </script>
+</body>
+</html>
