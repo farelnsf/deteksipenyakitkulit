@@ -60,9 +60,20 @@
     
     .disclaimer-box {
       background-color: #fff8f8;
-      padding: 15px;
+      border-left: 5px solid #ff6b6b;
+      padding: 20px;
+      margin: 30px 0;
       border-radius: 10px;
-      margin: 20px 0;
+      box-shadow: 0 3px 10px rgba(255, 107, 107, 0.1);
+    }
+
+    .disclaimer-box h3 {
+      color: #d32f2f;
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
     
     .back-button {
@@ -207,7 +218,13 @@
     
     <div class="disclaimer-box">
       <h3>Penting!</h3>
-      <p>Hasil deteksi ini merupakan analisis otomatis dan <strong>belum tentu 100% akurat</strong>.</p>
+        <p>Hasil deteksi ini merupakan analisis otomatis dan <strong>belum tentu 100% akurat</strong>.</p>
+        <p>Untuk diagnosis yang lebih pasti dan penanganan profesional, kami sangat menyarankan Anda untuk:</p>
+        <ul>
+          <li>Konsultasi dengan dokter spesialis kulit</li>
+          <li>Melakukan pemeriksaan lebih lanjut di klinik atau rumah sakit terdekat</li>
+          <li>Tidak mengandalkan sepenuhnya pada hasil ini untuk pengobatan</li>
+        </ul>
     </div>
     
     <button onclick="location.href='/home'" class="back-button">Kembali ke Beranda</button>
