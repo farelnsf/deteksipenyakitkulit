@@ -7,12 +7,9 @@ from ultralytics import YOLO
 from datetime import datetime
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB file size limit
 model = YOLO('weights/best.pt')
 
-# Ensure upload directory exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -45,7 +42,6 @@ def upload_page():
 
 @app.route('/detect', methods=['POST'])
 def detect():
-    filename = None
     detection_results = {
         'result': None,
         'labels': [],
@@ -98,12 +94,14 @@ def detect():
                 detection_results['boxes'].append(convert_to_percentage(box, img_width, img_height))
             detection_results['has_detection'] = True
 
-        filename = f"result_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
-        result_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        # Annotate result
         annotated = results[0].plot()
         annotated = cv2.cvtColor(annotated, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(result_path, annotated)
-        detection_results['result'] = url_for('static', filename=f'uploads/{filename}')
+
+        # Encode result in memory (base64)
+        _, buffer = cv2.imencode('.jpg', annotated)
+        encoded_image = base64.b64encode(buffer).decode('utf-8')
+        detection_results['result'] = f"data:image/jpeg;base64,{encoded_image}"
 
         return render_template('result.html', **detection_results)
 
