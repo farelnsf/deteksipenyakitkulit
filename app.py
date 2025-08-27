@@ -2,9 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for, Response
 import cv2
 import numpy as np
 import base64
+import io
 import os
 from ultralytics import YOLO
 from datetime import datetime
+from PIL import Image
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB file size limit
